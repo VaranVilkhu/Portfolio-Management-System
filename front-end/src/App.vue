@@ -1,16 +1,16 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
+<<<<<<< Updated upstream
   <HelloWorld msg=" Your Vue.js App"/>
+=======
+>>>>>>> Stashed changes
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  
 }
 </script>
 
