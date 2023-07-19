@@ -12,25 +12,17 @@ const session = require('express-session');
 // Initialization
 const app = express();
 
-app.use(morgan('dev'));
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-
-
 app.use(express.json());
 
 // For Passport JS Authentication
-app.use(passport.initialize());
-app.use(passport.session());
-require('./utils/passport.auth');
+// app.use(passport.initialize());
+// app.use(passport.session());
+// require('./utils/passport.auth');
 
-app.use((req, res, next) => {
-  res.locals.user = req.user;
-  next();
-});
+// app.use((req, res, next) => {
+//   res.locals.user = req.user;
+//   next();
+// });
 
 // Connect Flash
 // app.use(connectFlash());
@@ -45,13 +37,10 @@ app.use('/', require('./routes/index.route'));
 app.use('/auth', require('./routes/auth.route'));
 app.use(
   '/user',
-  ensureLoggedIn({ redirectTo: '/auth/login' }),
   require('./routes/user.route')
 );
 app.use(
   '/admin',
-  ensureLoggedIn({ redirectTo: '/auth/login' }),
-  ensureAdmin,
   require('./routes/admin.route')
 );
 
@@ -66,15 +55,6 @@ app.use((error, req, res, next) => {
   res.status(error.status);
   res.render('error_40x', { error });
 });
-
-function ensureAdmin(req, res, next) {
-  if (req.user.role === roles.admin) {
-    next();
-  } else {
-    req.flash('warning', 'you are not Authorized to see this route');
-    res.redirect('/');
-  }
-}
 
 app.listen(3000, () => {
   console.log("listening on port 3000")

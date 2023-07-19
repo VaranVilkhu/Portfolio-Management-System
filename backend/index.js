@@ -1,57 +1,72 @@
-const express= require("express");
-const dotenv =  require("dotenv");
-const client = require("./connection.js");
-const app= express();
+const express = require("express");
+const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-app.listen(5500,()=>{
-    console.log('server is listening on port 5500')
-})
-//const authenticate = require("./verifyToken.js");
-//app.use(authenticate)
+const bodyParser = require("body-parser");
+const {
+  verifyToken,
+  verifyStudent,
+  verifyAdmin,
+} = require("./middleware/verifyToken");
+const app = express();
+app.use(bodyParser.json());
 
-//signup 
-client.connect((err)=>{
-    if(err)
-    console.log(err)
-    else
-    console.log('connected')
+// app.listen(5500, () => {
+//   console.log("server is listening on port 5500");
+// });
+// const authenticate = require("./verifyToken.js");
+// app.use(authenticate)
+
+app.use(express.json());
+
+// For Passport JS Authentication
+// app.use(passport.initialize());
+// app.use(passport.session());
+// require("./utils/passport.auth");
+
+// app.use((req, res, next) => {
+//   res.locals.user = req.user;
+//   next();
+// });
+
+// Connect Flash
+// app.use(connectFlash());
+// app.use((req, res, next) => {
+//   res.locals.messages = req.flash();
+//   console.log("hjhkl")
+//   next();
+// });
+
+// Routes
+app.use("/", require("./routes/index.route"));
+app.use("/auth", require("./routes/auth.route"));
+app.use(
+  "/users",
+  // ensureLoggedIn({ redirectTo: '/auth/login' }),
+  verifyToken,
+  verifyStudent,
+  require("./routes/student.route")
+);
+app.use(
+  "/college",
+  verifyToken,
+  verifyAdmin,
+  require("./routes/college.route")
+);
+
+// 404 Handler
+app.use((req, res, next) => {
+  next(createHttpError.NotFound());
 });
-app.post("/signup",(req,res)=>{
-    //const user  = req.body;
-    //console.log(user)
-    // const user={
-    //     stu_email:"abjhudc",
-    //     password:"cdebkbbk0",
 
-    // }
-    const {stu_email,password}=req.body
-    let insertQuery = `insert into users (stu_email, password)
-                       values ('${stu_email}','${password}')`
-                       console.log('hiuiooi')
-    client.query(insertQuery, (err, message)=>{
-        if(!err){
-            console.log("bdchhk")
-         res.status(201).send("insertion successful");
-        }
-        else{console.log(err.message)}
-    })
-    client.end;
-})
+// Error Handler
+app.use((error, req, res, next) => {
+  error.status = error.status || 500;
+  res.status(error.status);
+  // res.render("error_40x", { error });
+});
 
-//login 
-
-app.post("/login",(req,res)=>{
-    
-    const{ email , password } = req.body;
-   
-    client.query(
-        `Select * from users where email = '${email}' and password = '${password}'`,(err, result) => { 
-            if (!err) {
-                console.log('hello again');
-             }
-             
-        }
-    )
-}
-)
+app.listen(3000, () => {
+  console.log("listening on port 3000");
+});
